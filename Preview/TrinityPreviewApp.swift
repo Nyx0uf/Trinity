@@ -130,7 +130,9 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 			stats.gpuMilliseconds,
 			stats.skippedFrames
 		)
-		if CommandLine.arguments.contains("--diagnostics") { NSLog("Trinity: %@", diagnosticLabel.stringValue) }
+		if CommandLine.arguments.contains("--diagnostics") {
+			TrinityLog.diagnostics.notice("\(self.diagnosticLabel.stringValue, privacy: .public)")
+		}
 	}
 
 	private func showError(_ message: String) {

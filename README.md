@@ -34,7 +34,12 @@ open .build/Build/Products/Release/TrinityPreview.app
 In the preview app, use **Trinity Options…** (⌘,) for tuning, **View → Show
 Diagnostics** (⌘D) for requested/measured fps, render size and GPU time, and
 **View → Enter Full Screen** (⌃⌘F) to evaluate fullscreen performance.
-For diagnostics in stderr as well, launch its executable with `--diagnostics`.
+To also log diagnostics every second, launch its executable with `--diagnostics`.
+Both products log to the unified log under the subsystem `fr.whine.Trinity`:
+
+```sh
+log stream --level info --predicate 'subsystem == "fr.whine.Trinity"'
+```
 
 ## Install manually
 

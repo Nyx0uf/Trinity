@@ -181,5 +181,6 @@ If the Xcode MCP is configured, prefer its tools over generic alternatives when 
 
 ### Diagnostics
 
-- The preview app's diagnostics overlay (⌘D, or `--diagnostics` for stderr) reports requested/measured fps, render size, GPU time and skipped frames from `TrinityRenderer.Diagnostics`.
+- Log with `Logger` through `TrinityLog` (subsystem `fr.whine.Trinity`, categories `settings`, `rendering` and `diagnostics`), never `NSLog` or `print`. Mark interpolated error descriptions and identifiers `privacy: .public` so they are readable outside a debugger; never log user data.
+- The preview app's diagnostics overlay (⌘D, or `--diagnostics` for the unified log) reports requested/measured fps, render size, GPU time and skipped frames from `TrinityRenderer.Diagnostics`.
 - Installed-host investigations may need temporary instrumentation (for example, writing state files to the temporary directory). Add it only when asked, and remove it before delivering a build.

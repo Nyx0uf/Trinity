@@ -58,7 +58,7 @@ struct TrinityConfiguration: Codable, Equatable {
 	/// or the stored data is unreadable. Failures are logged; a screensaver has no UI to report them.
 	static func load() -> TrinityConfiguration {
 		guard let store = ScreenSaverDefaults(forModuleWithName: moduleIdentifier) else {
-			NSLog("Trinity: cannot open settings for %@; using defaults.", moduleIdentifier)
+			TrinityLog.settings.error("Cannot open settings for \(moduleIdentifier, privacy: .public); using defaults.")
 			return .defaults
 		}
 		guard let data = store.data(forKey: storageKey) else { return .defaults }
@@ -66,7 +66,7 @@ struct TrinityConfiguration: Codable, Equatable {
 		do {
 			return try JSONDecoder().decode(Self.self, from: data).validated()
 		} catch {
-			NSLog("Trinity: cannot read saved settings; using defaults. %@", String(describing: error))
+			TrinityLog.settings.error("Cannot read saved settings; using defaults. \(String(describing: error), privacy: .public)")
 			return .defaults
 		}
 	}
@@ -75,19 +75,19 @@ struct TrinityConfiguration: Codable, Equatable {
 	/// Failures are logged and leave the previously saved settings in place.
 	func save() {
 		guard let store = ScreenSaverDefaults(forModuleWithName: Self.moduleIdentifier) else {
-			NSLog("Trinity: cannot open settings for %@; changes not saved.", Self.moduleIdentifier)
+			TrinityLog.settings.error("Cannot open settings for \(Self.moduleIdentifier, privacy: .public); changes not saved.")
 			return
 		}
 
 		do {
 			store.set(try JSONEncoder().encode(validated()), forKey: Self.storageKey)
 		} catch {
-			NSLog("Trinity: cannot encode settings; changes not saved. %@", String(describing: error))
+			TrinityLog.settings.error("Cannot encode settings; changes not saved. \(String(describing: error), privacy: .public)")
 			return
 		}
 
 		if !store.synchronize() {
-			NSLog("Trinity: settings could not be written to disk.")
+			TrinityLog.settings.error("Settings could not be written to disk.")
 		}
 	}
 

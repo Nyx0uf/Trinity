@@ -316,9 +316,11 @@ final class TrinityRenderer {
 			let milliseconds = (buffer.gpuEndTime - buffer.gpuStartTime) * 1000
 			let error = buffer.error?.localizedDescription
 			semaphore.signal()
+			if let error {
+				TrinityLog.rendering.error("GPU command buffer failed: \(error, privacy: .public)")
+			}
 			Task { @MainActor [weak self] in
 				self?.diagnostics.gpuMilliseconds = milliseconds
-				if let error { NSLog("Trinity GPU error: %@", error) }
 			}
 		}
 		command.commit()

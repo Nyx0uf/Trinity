@@ -52,7 +52,7 @@ final class TrinityMetalView: NSView {
 			metalLayer.device = renderer.device
 		} catch {
 			failureMessage = error.localizedDescription
-			NSLog("Trinity: %@", error.localizedDescription)
+			TrinityLog.rendering.error("Cannot start rendering: \(error.localizedDescription, privacy: .public)")
 		}
 	}
 
@@ -194,7 +194,7 @@ final class TrinityMetalView: NSView {
 			try renderer?.render(to: metalLayer, at: link.targetTimestamp, configuration: configuration)
 		} catch {
 			failureMessage = error.localizedDescription
-			NSLog("Trinity: %@", error.localizedDescription)
+			TrinityLog.rendering.error("Rendering stopped: \(error.localizedDescription, privacy: .public)")
 			invalidateLink()
 			onError?(error.localizedDescription)
 		}
