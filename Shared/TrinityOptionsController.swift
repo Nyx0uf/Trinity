@@ -99,7 +99,7 @@ final class TrinityOptionsController: NSWindowController {
 		for (index, parameter) in TrinityParameter.all.enumerated() {
 			let number = draft[keyPath: parameter.keyPath]
 			sliders[index].doubleValue = number
-			values[index].stringValue = String(format: "%.*f", parameter.decimals, number)
+			values[index].stringValue = number.formatted(.number.precision(.fractionLength(parameter.decimals)))
 		}
 		frameRate.selectItem(at: draft.frameRate.rawValue)
 		preview.configuration = draft

@@ -121,15 +121,13 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		guard diagnosticsVisible, let stats = metalView.renderer?.diagnostics else { return }
 
 		let requested = metalView.configuration.frameRate.requestedRate(on: window.screen)
-		diagnosticLabel.stringValue = String(
-			format: " Target %.0f fps · Actual %.1f fps · %d × %d · GPU %.2f ms · Skipped %d ",
-			requested,
-			stats.framesPerSecond,
-			stats.width,
-			stats.height,
-			stats.gpuMilliseconds,
-			stats.skippedFrames
-		)
+		let integer = IntegerFormatStyle<Int>.number.grouping(.never)
+		let target = requested.formatted(.number.precision(.fractionLength(0)))
+		let actual = stats.framesPerSecond.formatted(.number.precision(.fractionLength(1)))
+		let size = "\(stats.width.formatted(integer)) × \(stats.height.formatted(integer))"
+		let gpu = stats.gpuMilliseconds.formatted(.number.precision(.fractionLength(2)))
+		let skipped = stats.skippedFrames.formatted(integer)
+		diagnosticLabel.stringValue = " Target \(target) fps · Actual \(actual) fps · \(size) · GPU \(gpu) ms · Skipped \(skipped) "
 		if CommandLine.arguments.contains("--diagnostics") {
 			TrinityLog.diagnostics.notice("\(self.diagnosticLabel.stringValue, privacy: .public)")
 		}
