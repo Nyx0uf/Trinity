@@ -50,7 +50,11 @@ final class TrinityScreenSaverView: ScreenSaverView {
 	}
 
 	override var hasConfigureSheet: Bool { true }
+	// The host may read this property more than once per presentation. Return the open
+	// sheet rather than building another controller with its own running preview.
 	override var configureSheet: NSWindow? {
+		if let window = options?.window { return window }
+
 		let controller = TrinityOptionsController(configuration: .load(), context: .screenSaver) { [weak self] result in
 			if let result {
 				result.save()

@@ -31,6 +31,8 @@ final class TrinityMetalView: NSView {
 	private var displaySleeping = false
 	private let metalLayer = CAMetalLayer()
 	private var observersInstalled = false
+	/// The window whose screen and occlusion notifications this view receives; nil when none is observed.
+	private weak var observedWindow: NSWindow?
 	private let presentationContext: TrinityPresentationContext
 
 	init(frame: NSRect, configuration: TrinityConfiguration = .load(), context: TrinityPresentationContext = .application) {
@@ -85,8 +87,7 @@ final class TrinityMetalView: NSView {
 		let workspace = NSWorkspace.shared.notificationCenter
 		workspace.addObserver(self, selector: #selector(screensSleep), name: NSWorkspace.screensDidSleepNotification, object: nil)
 		workspace.addObserver(self, selector: #selector(screensWake), name: NSWorkspace.screensDidWakeNotification, object: nil)
-		NotificationCenter.default.addObserver(self, selector: #selector(screenChanged), name: NSWindow.didChangeScreenNotification, object: nil)
-		NotificationCenter.default.addObserver(self, selector: #selector(visibilityChanged), name: NSWindow.didChangeOcclusionStateNotification, object: nil)
+		observeWindow()
 	}
 
 	private func removeObservers() {
@@ -94,8 +95,29 @@ final class TrinityMetalView: NSView {
 		let workspace = NSWorkspace.shared.notificationCenter
 		workspace.removeObserver(self, name: NSWorkspace.screensDidSleepNotification, object: nil)
 		workspace.removeObserver(self, name: NSWorkspace.screensDidWakeNotification, object: nil)
-		NotificationCenter.default.removeObserver(self, name: NSWindow.didChangeScreenNotification, object: nil)
-		NotificationCenter.default.removeObserver(self, name: NSWindow.didChangeOcclusionStateNotification, object: nil)
+		stopObservingWindow()
+	}
+
+	// Display sleep is system-wide, but screen and occlusion changes come from this view's
+	// own window only. Several screensaver instances share one host process, one per display,
+	// and must not react to each other's windows. Called again whenever the view changes window.
+	private func observeWindow() {
+		guard observersInstalled, observedWindow !== window else { return }
+
+		stopObservingWindow()
+		guard let window else { return }
+
+		let center = NotificationCenter.default
+		center.addObserver(self, selector: #selector(screenChanged), name: NSWindow.didChangeScreenNotification, object: window)
+		center.addObserver(self, selector: #selector(visibilityChanged), name: NSWindow.didChangeOcclusionStateNotification, object: window)
+		observedWindow = window
+	}
+
+	private func stopObservingWindow() {
+		let center = NotificationCenter.default
+		center.removeObserver(self, name: NSWindow.didChangeScreenNotification, object: observedWindow)
+		center.removeObserver(self, name: NSWindow.didChangeOcclusionStateNotification, object: observedWindow)
+		observedWindow = nil
 	}
 
 	@objc private func screensSleep() {
@@ -163,7 +185,9 @@ final class TrinityMetalView: NSView {
 
 	override func viewDidMoveToWindow() {
 		super.viewDidMoveToWindow()
+		observeWindow()
 		updateDrawableSize()
+		updateFrameRate()
 		reconcileAnimation()
 	}
 
