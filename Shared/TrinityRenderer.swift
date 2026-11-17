@@ -3,44 +3,84 @@ import MetalKit
 import QuartzCore
 import Synchronization
 
+/// Owns every Metal resource and encodes one frame of the classic effect per `render` call.
+///
+/// Each frame runs the rain simulation compute pass, draws glyphs into a 16-bit float surface,
+/// builds a five-level bloom pyramid, then maps brightness through the palette into the drawable.
+/// Surfaces are reallocated only when the render size, density or bloom size change.
 @MainActor
 final class TrinityRenderer {
+	/// Frame statistics reported by the preview app's diagnostics overlay.
 	struct Diagnostics {
+		/// Frames submitted per second, measured over roughly one-second windows; 0 until measured.
 		var framesPerSecond = 0.0
+		/// GPU duration of the most recently completed frame, in milliseconds.
 		var gpuMilliseconds = 0.0
+		/// Render width in pixels, after the resolution scale.
 		var width = 0
+		/// Render height in pixels, after the resolution scale.
 		var height = 0
+		/// Frames committed to the GPU since the renderer was created.
 		var submittedFrames = 0
+		/// Frames dropped because three were already in flight.
 		var skippedFrames = 0
 	}
 
+	/// The system default Metal device, also assigned to the presenting layer.
 	let device: MTLDevice
+	/// Command queue for every frame.
 	private let queue: MTLCommandQueue
+	/// Compute pipeline advancing glyph symbols and rain brightness (`simulateRain`).
 	private let simulation: MTLComputePipelineState
+	/// Draws MSDF glyphs into `primary` (`drawGlyphs`).
 	private let glyphPipeline: MTLRenderPipelineState
+	/// Keeps pixels above the bloom threshold (`highPass`).
 	private let highPassPipeline: MTLRenderPipelineState
+	/// One-dimensional blur, horizontal or vertical depending on its step (`blurPass`).
 	private let blurPipeline: MTLRenderPipelineState
+	/// Combines glyphs and bloom, then applies the palette and dither (`composite`).
 	private let compositePipeline: MTLRenderPipelineState
+	/// The classic MSDF glyph atlas, loaded as linear data with a bottom-left origin.
 	private let atlas: MTLTexture
+	/// Limits frames in flight to three. Waited on without blocking; signaled by completion handlers.
 	private let inFlight = DispatchSemaphore(value: 3)
+	/// Ping-pong glyph state textures (symbol index, cycle phase), `gridDimension` square.
 	private var symbols: [MTLTexture] = []
+	/// Per-cell rain brightness and cursor flag, rewritten every frame.
 	private var rain: MTLTexture?
+	/// Full-resolution glyph brightness surface.
 	private var primary: MTLTexture?
+	/// High-pass result for each bloom level.
 	private var high: [MTLTexture] = []
+	/// Horizontally blurred intermediate for each bloom level.
 	private var horizontal: [MTLTexture] = []
+	/// Final blurred result for each bloom level, sampled by the composite pass.
 	private var bloom: [MTLTexture] = []
+	/// 2048-entry palette for the current hue.
 	private var palette: MTLTexture?
+	/// Hue `palette` was built for; nil before the first frame.
 	private var paletteHue: Double?
+	/// Simulation grid dimension the state textures were allocated for; 0 before the first frame.
 	private var gridDimension = 0
+	/// Render size in pixels the surfaces were allocated for.
 	private var size = SIMD2<Int>(0, 0)
+	/// Bloom size the bloom surfaces were allocated for; negative before the first frame.
 	private var bloomScale = -1.0
+	/// Index of the `symbols` texture holding the previous frame's state.
 	private var stateIndex = 0
+	/// True until the first frame after (re)allocating the grid, which seeds random symbols.
 	private var firstFrame = true
+	/// Accumulated animation time in seconds, scaled by the animation speed.
 	private var animationTime = 0.0
+	/// Display-link target timestamp of the previous frame; nil after a timing reset.
 	private var lastTimestamp: CFTimeInterval?
+	/// Start of the current frame-rate measurement window.
 	private var measurementStart: CFTimeInterval?
+	/// Frames counted in the current measurement window, including the one that opened it.
 	private var measurementFrames = 0
+	/// Per-renderer random seed so instances on different displays differ.
 	private let seed = Float.random(in: 0...100)
+	/// Statistics updated on the main actor; `diagnostics` adds the GPU time.
 	private var counters = Diagnostics()
 	/// Duration of the most recently completed command buffer, in milliseconds. Written by
 	/// Metal's completion handler off the main actor and read only when diagnostics are requested,
@@ -54,9 +94,11 @@ final class TrinityRenderer {
 		return value
 	}
 
+	/// Creates the device, pipelines and atlas from `bundle`, which must be Trinity's own
+	/// bundle: inside the screensaver host, the main bundle belongs to the host.
 	init(bundle: Bundle) throws {
 		guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue() else {
-			throw Failure("Metal is unavailable on this Mac.")
+			throw Failure(.errorMetalUnavailable)
 		}
 
 		self.device = device
@@ -64,12 +106,12 @@ final class TrinityRenderer {
 		let library = try device.makeDefaultLibrary(bundle: bundle)
 		guard let compute = library.makeFunction(name: "simulateRain"),
 		      let vertex = library.makeFunction(name: "fullScreen") else {
-			throw Failure("The bundled Metal library is incomplete.")
+			throw Failure(.errorShaderLibraryIncomplete)
 		}
 
 		simulation = try device.makeComputePipelineState(function: compute)
 		func pipeline(_ name: String, _ format: MTLPixelFormat) throws -> MTLRenderPipelineState {
-			guard let fragment = library.makeFunction(name: name) else { throw Failure("Missing shader: \(name)") }
+			guard let fragment = library.makeFunction(name: name) else { throw Failure(.errorMissingShader(name)) }
 
 			let descriptor = MTLRenderPipelineDescriptor()
 			descriptor.label = name
@@ -83,7 +125,7 @@ final class TrinityRenderer {
 		blurPipeline = try pipeline("blurPass", .rgba16Float)
 		compositePipeline = try pipeline("composite", .bgra8Unorm)
 		guard let url = bundle.url(forResource: "matrixcode_msdf", withExtension: "png") else {
-			throw Failure("The classic glyph atlas is missing.")
+			throw Failure(.errorGlyphAtlasMissing)
 		}
 
 		atlas = try MTKTextureLoader(device: device).newTexture(URL: url, options: [
@@ -93,6 +135,8 @@ final class TrinityRenderer {
 		])
 	}
 
+	/// Forgets the previous timestamp and frame-rate window so the next frame advances by zero
+	/// instead of catching up after a pause, suspension or frame-rate change.
 	func resetTiming() {
 		lastTimestamp = nil
 		measurementStart = nil
@@ -100,6 +144,7 @@ final class TrinityRenderer {
 		counters.framesPerSecond = 0
 	}
 
+	/// Allocates a private 2D texture of at least 1 × 1 pixels.
 	private func texture(
 		_ width: Int,
 		_ height: Int,
@@ -115,12 +160,15 @@ final class TrinityRenderer {
 		descriptor.usage = usage
 		descriptor.storageMode = .private
 		guard let value = device.makeTexture(descriptor: descriptor) else {
-			throw Failure("Metal could not allocate a \(width) × \(height) rendering texture.")
+			throw Failure(.errorTextureAllocation(width, height))
 		}
 
 		return value
 	}
 
+	/// Reallocates whatever the configuration or render size invalidated: the simulation grid,
+	/// the full-resolution and bloom surfaces, and the palette. Existing resources are replaced only
+	/// after every new allocation succeeds.
 	private func prepare(width: Int, height: Int, configuration c: TrinityConfiguration) throws {
 		let dimension = Int(c.columns)
 		if gridDimension != dimension {
@@ -163,7 +211,7 @@ final class TrinityRenderer {
 				mipmapped: false
 			)
 			descriptor.storageMode = .shared
-			guard let nextPalette = device.makeTexture(descriptor: descriptor) else { throw Failure("Cannot allocate palette.") }
+			guard let nextPalette = device.makeTexture(descriptor: descriptor) else { throw Failure(.errorPaletteAllocation) }
 
 			let stops: [(Int, SIMD3<Float>)] = [0.0, 0.2, 0.7, 0.8].map { lightness in
 				return (Int(lightness * 2047), Self.hsl(c.hue, 0.9, lightness))
@@ -193,6 +241,7 @@ final class TrinityRenderer {
 		}
 	}
 
+	/// Converts HSL (each component from 0 to 1) to RGB, matching the shaders' `hsl` function.
 	private static func hsl(_ hue: Double, _ saturation: Double, _ lightness: Double) -> SIMD3<Float> {
 		func channel(_ offset: Double) -> Float {
 			let h = hue + offset
@@ -203,6 +252,8 @@ final class TrinityRenderer {
 		return SIMD3(channel(0), channel(2.0 / 3), channel(1.0 / 3))
 	}
 
+	/// Encodes one full-screen fragment pass into `destination`. Sources bind to consecutive
+	/// texture indices; buffer 0 receives `step` when given, otherwise the frame uniforms.
 	private func pass(
 		_ command: MTLCommandBuffer,
 		pipeline: MTLRenderPipelineState,
@@ -216,7 +267,7 @@ final class TrinityRenderer {
 		descriptor.colorAttachments[0].loadAction = .dontCare
 		descriptor.colorAttachments[0].storeAction = .store
 		guard let encoder = command.makeRenderCommandEncoder(descriptor: descriptor) else {
-			throw Failure("Cannot create a Metal render encoder.")
+			throw Failure(.errorRenderEncoder)
 		}
 
 		encoder.label = pipeline.label
@@ -231,8 +282,8 @@ final class TrinityRenderer {
 		encoder.endEncoding()
 	}
 
-	// Five-level bloom pyramid: high-pass each level from the one above, then blur it
-	// horizontally and vertically. Skipped entirely when bloom is disabled.
+	/// Encodes the five-level bloom pyramid: high-pass each level from the one above, then blur it
+	/// horizontally and vertically. Skipped entirely when bloom is disabled.
 	private func encodeBloom(
 		_ command: MTLCommandBuffer,
 		from primary: MTLTexture,
@@ -268,6 +319,9 @@ final class TrinityRenderer {
 		}
 	}
 
+	/// Encodes, presents and commits one frame to `layer`, advancing the animation by the time
+	/// since the previous `timestamp`, clamped to 0.1 s. Skips the frame without blocking when three
+	/// are already in flight, and does nothing while the drawable is empty or unavailable.
 	func render(to layer: CAMetalLayer, at timestamp: CFTimeInterval, configuration c: TrinityConfiguration) throws {
 		guard layer.drawableSize.width > 0, layer.drawableSize.height > 0 else { return }
 		guard inFlight.wait(timeout: .now()) == .success else {
@@ -293,7 +347,7 @@ final class TrinityRenderer {
 		uniforms.appearance = SIMD4(Float(c.trailLength), Float(c.brightness), Float(c.cursorIntensity), Float(c.hue))
 		uniforms.effects = SIMD4(Float(c.bloomStrength), Float(c.bloomSize), Float(c.dither), 0.1)
 		uniforms.viewport = SIMD4(Float(width), Float(height), 0, 0)
-		guard let compute = command.makeComputeCommandEncoder() else { throw Failure("Cannot create simulation encoder.") }
+		guard let compute = command.makeComputeCommandEncoder() else { throw Failure(.errorSimulationEncoder) }
 
 		compute.label = "Classic rain and glyph simulation"
 		compute.setComputePipelineState(simulation)
@@ -353,9 +407,15 @@ final class TrinityRenderer {
 		let value = Mutex(0.0)
 	}
 
+	/// A rendering setup or encoding error with a localized, user-presentable description.
 	struct Failure: LocalizedError {
-		let message: String
-		init(_ message: String) { self.message = message }
-		var errorDescription: String? { message }
+		/// The localized description shown by the preview app's alert.
+		let message: LocalizedStringResource
+
+		/// Creates a failure described by `message`.
+		init(_ message: LocalizedStringResource) { self.message = message }
+
+		/// The resolved message.
+		var errorDescription: String? { String(localized: message) }
 	}
 }

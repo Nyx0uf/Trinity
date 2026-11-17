@@ -89,19 +89,26 @@ Follow Apple's macOS Human Interface Guidelines.
 
 - Organize files consistently around responsibilities. Every type is prefixed `Trinity`.
 - Prefer separate files for distinct types when doing so improves organization and readability.
-- Add code comments and documentation comments when they clarify non-obvious behavior or important design decisions. Document concrete types and member properties with their purpose, ownership, units or lifecycle.
+- Add code comments and documentation comments when they clarify non-obvious behavior or important design decisions. Document every Swift declaration at every access level (types, extensions, functions, initializers, properties, enum cases) with concise `///` comments explaining purpose, units, ownership or lifecycle, and every Metal shader function with a short `///` comment.
 - Do not add comments that simply restate what the code already expresses.
 
 ### Localization
 
-The project has no string catalog yet; user-facing strings are English literals in code. Do not introduce a localization system without asking first. If one is added, follow Esper's conventions: `Localizable.xcstrings` with semantic keys and `extractionState` set to `manual`, in English and French.
+User-facing strings live in `Resources/Localizable.xcstrings`, shared by both targets, in English only.
+
+- **Never hardcode user-facing strings** in AppKit controls, menus, alerts, window titles or error descriptions.
+- Use semantic keys such as `optionsApply`, with `extractionState` set to `manual` and a `comment` describing where the string appears and what each placeholder holds.
+- Access the generated symbols (`STRING_CATALOG_GENERATE_SYMBOLS`), such as `String(localized: .optionsApply)`, or store a `LocalizedStringResource` and resolve it when displayed. Generated symbols resolve against the module's own bundle, which is required inside the screensaver host; never look strings up in `Bundle.main`.
+- Integers may use `%lld` placeholders; pass decimal numbers as strings formatted with Swift format styles (`%@`).
+- Do not add other languages unless asked. Log messages, Metal debug labels and identifiers are not localized.
 
 ### Formatting and Linting
 
 The project uses **SwiftFormat** and **SwiftLint**, with the same configuration as Esper and Kiroshi. These tools are the source of truth for code formatting and linting.
 
 - Follow the existing `.swiftformat` and `.swiftlint.yml` configuration files.
-- `make check` runs SwiftFormat in lint mode and strict SwiftLint over `Shared`, `ScreenSaver` and `Preview`. `make format` applies formatting. In the maintainer's shell, `make` and `rm` are shadowed by user functions and aliases: call `/usr/bin/make` and `/bin/rm`.
+- Debug and Release builds of both targets run SwiftFormat, then strict SwiftLint, before compiling, as in Esper. A missing tool is a build warning; a formatting failure or lint violation fails the build. User-script sandboxing is disabled on both targets so the phases can run the Homebrew tools.
+- `make check` runs SwiftFormat in lint mode and strict SwiftLint over `Shared`, `ScreenSaver` and `Preview`. `make format` applies formatting. In the maintainer's shell, `make`, `rm` and `cp` are shadowed by user functions and aliases (`cp` prompts before overwriting): call `/usr/bin/make`, `/bin/rm` and `/bin/cp`.
 - Run SwiftFormat and SwiftLint on modified Swift files and resolve violations introduced by your modifications.
 - Do not disable, suppress, or modify linting rules simply to avoid fixing a violation.
 - Avoid adding `swiftformat:disable` or `swiftlint:disable` directives unless there is a valid justification.

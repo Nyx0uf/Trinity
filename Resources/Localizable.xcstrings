@@ -1,0 +1,510 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "aboutApplicationName" : {
+      "comment" : "Application name shown in the About panel.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinity"
+          }
+        }
+      }
+    },
+    "aboutCredits" : {
+      "comment" : "Credits shown in the About panel.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A native Metal port of Rezmason’s classic Matrix rain.\nOriginal effect © 2018 Rezmason · MIT License"
+          }
+        }
+      }
+    },
+    "diagnosticsSummary" : {
+      "comment" : "Performance overlay. Formatted numbers: %1$@ requested fps, %2$@ measured fps, %3$@ × %4$@ render width and height in pixels, %5$@ GPU time per frame, %6$@ skipped frames.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Target %1$@ fps · Actual %2$@ fps · %3$@ × %4$@ · GPU %5$@ ms · Skipped %6$@"
+          }
+        }
+      }
+    },
+    "errorGlyphAtlasMissing" : {
+      "comment" : "Rendering error: the glyph image resource is missing.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The classic glyph atlas is missing."
+          }
+        }
+      }
+    },
+    "errorMetalUnavailable" : {
+      "comment" : "Rendering error: no Metal device.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metal is unavailable on this Mac."
+          }
+        }
+      }
+    },
+    "errorMissingShader" : {
+      "comment" : "Rendering error. %@ is the internal shader function name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missing shader: %@"
+          }
+        }
+      }
+    },
+    "errorPaletteAllocation" : {
+      "comment" : "Rendering error: the color palette texture could not be created.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot allocate palette."
+          }
+        }
+      }
+    },
+    "errorRenderEncoder" : {
+      "comment" : "Rendering error while encoding a frame.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot create a Metal render encoder."
+          }
+        }
+      }
+    },
+    "errorShaderLibraryIncomplete" : {
+      "comment" : "Rendering error: required shader functions are missing.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The bundled Metal library is incomplete."
+          }
+        }
+      }
+    },
+    "errorSimulationEncoder" : {
+      "comment" : "Rendering error while encoding the rain simulation.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot create simulation encoder."
+          }
+        }
+      }
+    },
+    "errorTextureAllocation" : {
+      "comment" : "Rendering error. %1$lld and %2$lld are the texture width and height in pixels.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metal could not allocate a %1$lld × %2$lld rendering texture."
+          }
+        }
+      }
+    },
+    "frameRateMatchDisplay" : {
+      "comment" : "Frame-rate option that follows the display's maximum refresh rate.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match Display"
+          }
+        }
+      }
+    },
+    "frameRateSixty" : {
+      "comment" : "Frame-rate option limited to 60 frames per second.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60 fps"
+          }
+        }
+      }
+    },
+    "frameRateThirty" : {
+      "comment" : "Frame-rate option limited to 30 frames per second.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 fps"
+          }
+        }
+      }
+    },
+    "menuAbout" : {
+      "comment" : "Application menu item.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About Trinity"
+          }
+        }
+      }
+    },
+    "menuEnterFullScreen" : {
+      "comment" : "View menu item.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter Full Screen"
+          }
+        }
+      }
+    },
+    "menuExitFullScreen" : {
+      "comment" : "View menu item shown while in full screen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exit Full Screen"
+          }
+        }
+      }
+    },
+    "menuHideDiagnostics" : {
+      "comment" : "View menu item that hides the performance overlay.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide Diagnostics"
+          }
+        }
+      }
+    },
+    "menuOptions" : {
+      "comment" : "Application menu item that opens the options sheet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinity Options…"
+          }
+        }
+      }
+    },
+    "menuQuit" : {
+      "comment" : "Application menu item.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit Trinity Preview"
+          }
+        }
+      }
+    },
+    "menuShowDiagnostics" : {
+      "comment" : "View menu item that shows the performance overlay.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Diagnostics"
+          }
+        }
+      }
+    },
+    "menuView" : {
+      "comment" : "Title of the View menu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View"
+          }
+        }
+      }
+    },
+    "optionsApply" : {
+      "comment" : "Button that saves the settings and closes the options window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apply"
+          }
+        }
+      }
+    },
+    "optionsCancel" : {
+      "comment" : "Button that closes the options window without saving.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "optionsFrameRate" : {
+      "comment" : "Label and accessibility label of the frame-rate pop-up button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frame rate"
+          }
+        }
+      }
+    },
+    "optionsHeading" : {
+      "comment" : "Heading at the top of the options window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinity"
+          }
+        }
+      }
+    },
+    "optionsRestoreDefaults" : {
+      "comment" : "Button that resets the draft settings to their defaults.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Defaults"
+          }
+        }
+      }
+    },
+    "optionsWindowTitle" : {
+      "comment" : "Title of the options window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinity Options"
+          }
+        }
+      }
+    },
+    "parameterAnimationSpeed" : {
+      "comment" : "Slider label: overall animation speed multiplier.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Animation speed"
+          }
+        }
+      }
+    },
+    "parameterBloomSize" : {
+      "comment" : "Slider label: size of the glow around bright glyphs.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloom size"
+          }
+        }
+      }
+    },
+    "parameterBloomStrength" : {
+      "comment" : "Slider label: intensity of the glow around bright glyphs.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloom strength"
+          }
+        }
+      }
+    },
+    "parameterBrightness" : {
+      "comment" : "Slider label: glyph brightness.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brightness"
+          }
+        }
+      }
+    },
+    "parameterCursorIntensity" : {
+      "comment" : "Slider label: brightness of the leading cursor glyph.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor intensity"
+          }
+        }
+      }
+    },
+    "parameterDensity" : {
+      "comment" : "Slider label: number of glyph columns.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Density"
+          }
+        }
+      }
+    },
+    "parameterDither" : {
+      "comment" : "Slider label: amount of noise added to hide color banding.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dither"
+          }
+        }
+      }
+    },
+    "parameterFallSpeed" : {
+      "comment" : "Slider label: speed of the falling illumination.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fall speed"
+          }
+        }
+      }
+    },
+    "parameterGlyphCycleSpeed" : {
+      "comment" : "Slider label: how often glyphs change symbol.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyph cycle speed"
+          }
+        }
+      }
+    },
+    "parameterHue" : {
+      "comment" : "Slider label: color hue of the effect.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hue"
+          }
+        }
+      }
+    },
+    "parameterResolutionScale" : {
+      "comment" : "Slider label: rendering resolution relative to the display.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resolution scale"
+          }
+        }
+      }
+    },
+    "parameterTrailLength" : {
+      "comment" : "Slider label: length of each falling trail.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trail length"
+          }
+        }
+      }
+    },
+    "previewWindowTitle" : {
+      "comment" : "Title of the preview app's main window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinity Preview"
+          }
+        }
+      }
+    },
+    "renderingFailedTitle" : {
+      "comment" : "Title of the alert shown when rendering fails.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinity could not start rendering"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

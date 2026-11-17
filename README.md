@@ -20,8 +20,10 @@ Open `Trinity.xcodeproj` with Xcode 27.2 or later.
 
 Both targets use ad-hoc signing for local use and need no development team.
 No third-party packages or automated test targets are included.
-`make check` runs SwiftFormat in lint mode and strict SwiftLint over the Swift
-sources; `make format` applies formatting. Both tools come from Homebrew.
+Both targets run SwiftFormat and then strict SwiftLint before compiling; install
+them with `brew install swiftformat swiftlint`. Without them the build only warns.
+`make check` runs the same checks without building, and `make format` applies
+formatting. User-facing strings are in `Resources/Localizable.xcstrings` (English).
 
 ```sh
 xcodebuild -project Trinity.xcodeproj -scheme Trinity \
