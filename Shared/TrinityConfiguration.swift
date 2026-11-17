@@ -51,20 +51,44 @@ struct TrinityConfiguration: Codable, Equatable {
 	var resolution = 1.0
 	var frameRate = TrinityFrameRate.display
 
-	static func load() -> TrinityConfiguration {
-		guard let store = ScreenSaverDefaults(forModuleWithName: moduleIdentifier),
-		      let data = store.data(forKey: "configuration.v1"),
-		      let value = try? JSONDecoder().decode(Self.self, from: data) else { return .defaults }
+	/// Defaults key holding the JSON-encoded configuration. Changing it discards saved settings.
+	static let storageKey = "configuration.v1"
 
-		return value.validated()
+	/// Loads the saved configuration, falling back to the defaults when none is saved
+	/// or the stored data is unreadable. Failures are logged; a screensaver has no UI to report them.
+	static func load() -> TrinityConfiguration {
+		guard let store = ScreenSaverDefaults(forModuleWithName: moduleIdentifier) else {
+			NSLog("Trinity: cannot open settings for %@; using defaults.", moduleIdentifier)
+			return .defaults
+		}
+		guard let data = store.data(forKey: storageKey) else { return .defaults }
+
+		do {
+			return try JSONDecoder().decode(Self.self, from: data).validated()
+		} catch {
+			NSLog("Trinity: cannot read saved settings; using defaults. %@", String(describing: error))
+			return .defaults
+		}
 	}
 
+	/// Saves the validated configuration for the preview app and new screensaver instances.
+	/// Failures are logged and leave the previously saved settings in place.
 	func save() {
-		guard let store = ScreenSaverDefaults(forModuleWithName: Self.moduleIdentifier),
-		      let data = try? JSONEncoder().encode(validated()) else { return }
+		guard let store = ScreenSaverDefaults(forModuleWithName: Self.moduleIdentifier) else {
+			NSLog("Trinity: cannot open settings for %@; changes not saved.", Self.moduleIdentifier)
+			return
+		}
 
-		store.set(data, forKey: "configuration.v1")
-		store.synchronize()
+		do {
+			store.set(try JSONEncoder().encode(validated()), forKey: Self.storageKey)
+		} catch {
+			NSLog("Trinity: cannot encode settings; changes not saved. %@", String(describing: error))
+			return
+		}
+
+		if !store.synchronize() {
+			NSLog("Trinity: settings could not be written to disk.")
+		}
 	}
 
 	func validated() -> Self {
