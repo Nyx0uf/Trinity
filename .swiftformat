@@ -1,0 +1,35 @@
+--min-version 0.64.1
+--swift-version 6.3
+--language-mode 6
+
+# Keep automatic formatting limited to layout; SwiftLint owns code quality.
+--rules blankLineAfterImports,blankLinesAtEndOfScope,blankLinesAtStartOfScope,blankLinesBetweenChainedFunctions,blankLinesBetweenScopes,braces,consecutiveBlankLines,consecutiveSpaces,elseOnSameLine,emptyBraces,indent,leadingDelimiters,linebreakAtEndOfFile,linebreaks,semicolons,spaceAroundBraces,spaceAroundBrackets,spaceAroundGenerics,spaceAroundOperators,spaceAroundParens,spaceInsideBraces,spaceInsideBrackets,spaceInsideGenerics,spaceInsideParens,trailingCommas,trailingSpace,wrapArguments,blankLineAfterSwitchCase,blankLinesAfterGuardStatements,preferFinalClasses,singlePropertyPerLine,wrapCaseBodies,wrapClosureBodies,wrapDoBodies,wrapEnumCases,wrapMultilineFunctionChains
+
+--indent tab
+--tab-width 4
+--smart-tabs enabled
+--indent-case true
+--ifdef no-indent
+--linebreaks lf
+--trim-whitespace always
+--indent-blank-lines false
+
+--allman false
+--else-position same-line
+--guard-else same-line
+--empty-braces no-space
+--semicolons never
+--no-space-operators ...,..<
+--trailing-commas never
+
+# Keep short expressions inline and give existing multiline lists balanced ends.
+--max-width none
+--wrap-arguments before-first
+--wrap-parameters before-first
+--wrap-collections before-first
+--allow-partial-wrapping false
+--closing-paren balanced
+--wrap-conditions preserve
+--wrap-effects never
+--wrap-return-type never
+--blank-line-after-switch-case always

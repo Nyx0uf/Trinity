@@ -1,0 +1,39 @@
+included:
+  - Shared
+  - ScreenSaver
+  - Preview
+
+disabled_rules:
+  # Size and naming allowances shared with Esper and Kiroshi.
+  - line_length
+  - nesting
+  - force_cast
+  - identifier_name
+  - large_tuple
+  - function_body_length
+  - file_length
+  - type_body_length
+
+  # Layout is enforced by SwiftFormat, including indented switch cases.
+  - attribute_name_spacing
+  - closing_brace
+  - closure_parameter_position
+  - colon
+  - comma
+  - comment_spacing
+  - function_name_whitespace
+  - leading_whitespace
+  - no_space_in_method_call
+  - opening_brace
+  - return_arrow_whitespace
+  - statement_position
+  - switch_case_alignment
+  - trailing_comma
+  - trailing_newline
+  - trailing_semicolon
+  - trailing_whitespace
+  - vertical_whitespace
+
+# Preserve the force-unwrap protection previously supplied by swift-format.
+opt_in_rules:
+  - force_unwrapping
