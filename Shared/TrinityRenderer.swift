@@ -78,6 +78,10 @@ final class TrinityRenderer {
 	private var measurementStart: CFTimeInterval?
 	/// Frames counted in the current measurement window, including the one that opened it.
 	private var measurementFrames = 0
+	/// Format of the glyph and bloom surfaces. The shaders use only red (trail brightness) and
+	/// green (cursor brightness), so two half-float channels halve memory and bandwidth compared
+	/// with four; fragment outputs beyond these channels are discarded.
+	private static let surfaceFormat = MTLPixelFormat.rg16Float
 	/// Per-renderer random seed so instances on different displays differ.
 	private let seed = Float.random(in: 0...100)
 	/// Statistics updated on the main actor; `diagnostics` adds the GPU time.
@@ -120,9 +124,9 @@ final class TrinityRenderer {
 			descriptor.colorAttachments[0].pixelFormat = format
 			return try device.makeRenderPipelineState(descriptor: descriptor)
 		}
-		glyphPipeline = try pipeline("drawGlyphs", .rgba16Float)
-		highPassPipeline = try pipeline("highPass", .rgba16Float)
-		blurPipeline = try pipeline("blurPass", .rgba16Float)
+		glyphPipeline = try pipeline("drawGlyphs", Self.surfaceFormat)
+		highPassPipeline = try pipeline("highPass", Self.surfaceFormat)
+		blurPipeline = try pipeline("blurPass", Self.surfaceFormat)
 		compositePipeline = try pipeline("composite", .bgra8Unorm)
 		guard let url = bundle.url(forResource: "matrixcode_msdf", withExtension: "png") else {
 			throw Failure(.errorGlyphAtlasMissing)
@@ -148,7 +152,7 @@ final class TrinityRenderer {
 	private func texture(
 		_ width: Int,
 		_ height: Int,
-		format: MTLPixelFormat = .rgba16Float,
+		format: MTLPixelFormat = surfaceFormat,
 		usage: MTLTextureUsage = [.shaderRead, .renderTarget]
 	) throws -> MTLTexture {
 		let descriptor = MTLTextureDescriptor.texture2DDescriptor(
@@ -182,8 +186,11 @@ final class TrinityRenderer {
 			firstFrame = true
 			stateIndex = 0
 		}
-		if size != SIMD2(width, height) || bloomScale != c.bloomSize {
-			let nextPrimary = try texture(width, height)
+		let sizeChanged = size != SIMD2(width, height)
+		if sizeChanged || bloomScale != c.bloomSize {
+			// The glyph surface depends only on the render size; bloom size changes keep it.
+			var nextPrimary = primary
+			if sizeChanged || nextPrimary == nil { nextPrimary = try texture(width, height) }
 			var nextHigh: [MTLTexture] = []
 			var nextHorizontal: [MTLTexture] = []
 			var nextBloom: [MTLTexture] = []

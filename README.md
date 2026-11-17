@@ -80,7 +80,8 @@ upstream's 60 Hz reference. Fall speed and cycling therefore do not accelerate
 on high-refresh displays. Timing is reset after suspension to avoid catch-up.
 
 Simulation textures remain on the GPU. Intermediate rain/bloom surfaces use
-16-bit floating point; glyph state uses 32-bit floats. The bloom pyramid has five
+two-channel 16-bit floating point (trail and cursor brightness); glyph state uses
+32-bit floats. The bloom pyramid has five
 levels with upstream's threshold, blur and combination weights. Its result is
 combined directly in the palette pass to avoid an extra full-resolution surface.
 The atlas is loaded as linear data with the original bottom-left coordinate origin.
