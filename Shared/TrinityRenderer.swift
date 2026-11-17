@@ -1,6 +1,7 @@
 import AppKit
 import MetalKit
 import QuartzCore
+import Synchronization
 
 @MainActor
 final class TrinityRenderer {
@@ -40,7 +41,18 @@ final class TrinityRenderer {
 	private var measurementStart: CFTimeInterval?
 	private var measurementFrames = 0
 	private let seed = Float.random(in: 0...100)
-	private(set) var diagnostics = Diagnostics()
+	private var counters = Diagnostics()
+	/// Duration of the most recently completed command buffer, in milliseconds. Written by
+	/// Metal's completion handler off the main actor and read only when diagnostics are requested,
+	/// so completing a frame needs no main-actor hop.
+	private let gpuMilliseconds = GPUTime()
+
+	/// Frame statistics for the preview app's diagnostics overlay.
+	var diagnostics: Diagnostics {
+		var value = counters
+		value.gpuMilliseconds = gpuMilliseconds.value.withLock { $0 }
+		return value
+	}
 
 	init(bundle: Bundle) throws {
 		guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue() else {
@@ -85,7 +97,7 @@ final class TrinityRenderer {
 		lastTimestamp = nil
 		measurementStart = nil
 		measurementFrames = 0
-		diagnostics.framesPerSecond = 0
+		counters.framesPerSecond = 0
 	}
 
 	private func texture(
@@ -259,7 +271,7 @@ final class TrinityRenderer {
 	func render(to layer: CAMetalLayer, at timestamp: CFTimeInterval, configuration c: TrinityConfiguration) throws {
 		guard layer.drawableSize.width > 0, layer.drawableSize.height > 0 else { return }
 		guard inFlight.wait(timeout: .now()) == .success else {
-			diagnostics.skippedFrames += 1
+			counters.skippedFrames += 1
 			return
 		}
 
@@ -312,30 +324,33 @@ final class TrinityRenderer {
 		)
 		command.present(drawable)
 		let semaphore = inFlight
-		command.addCompletedHandler { [weak self] buffer in
-			let milliseconds = (buffer.gpuEndTime - buffer.gpuStartTime) * 1000
-			let error = buffer.error?.localizedDescription
+		let gpuTime = gpuMilliseconds
+		command.addCompletedHandler { buffer in
+			gpuTime.value.withLock { $0 = (buffer.gpuEndTime - buffer.gpuStartTime) * 1000 }
 			semaphore.signal()
-			if let error {
-				TrinityLog.rendering.error("GPU command buffer failed: \(error, privacy: .public)")
-			}
-			Task { @MainActor [weak self] in
-				self?.diagnostics.gpuMilliseconds = milliseconds
+			if let error = buffer.error {
+				TrinityLog.rendering.error("GPU command buffer failed: \(error.localizedDescription, privacy: .public)")
 			}
 		}
 		command.commit()
 		committed = true
 		stateIndex = nextIndex
 		firstFrame = false
-		diagnostics.width = width
-		diagnostics.height = height
-		diagnostics.submittedFrames += 1
+		counters.width = width
+		counters.height = height
+		counters.submittedFrames += 1
 		measurementFrames += 1
 		if let start = measurementStart, timestamp - start >= 1 {
-			diagnostics.framesPerSecond = Double(measurementFrames - 1) / (timestamp - start)
+			counters.framesPerSecond = Double(measurementFrames - 1) / (timestamp - start)
 			measurementStart = timestamp
 			measurementFrames = 1
 		} else if measurementStart == nil { measurementStart = timestamp }
+	}
+
+	/// Lock-protected GPU duration shared between the renderer and Metal's completion handlers.
+	nonisolated final class GPUTime: Sendable {
+		/// Milliseconds the last completed command buffer spent on the GPU.
+		let value = Mutex(0.0)
 	}
 
 	struct Failure: LocalizedError {
