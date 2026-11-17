@@ -2,75 +2,53 @@
   "default-configuration": "Debug",
   "configurations": [
     "Debug",
-    "Release"
+    "Release",
   ],
+  "localizations": {
+    "development": "en",
+    "supported": [
+      "Base",
+    ],
+  },
   "files": [
-    {
-      "kind": "folder",
-      "path": "Shared",
-      "target-membership": [
-        "Trinity",
-        "TrinityPreview"
-      ],
-      "membership-exceptions": []
-    },
-    {
-      "kind": "folder",
-      "path": "Resources",
-      "target-membership": [
-        "Trinity",
-        "TrinityPreview"
-      ],
-      "membership-exceptions": []
-    },
+    { "kind": "folder", "path": "Shared", "target-membership": [ "Trinity", "TrinityPreview" ] },
+    { "kind": "folder", "path": "Resources", "target-membership": [ "Trinity", "TrinityPreview" ] },
     {
       "kind": "folder",
       "path": "ScreenSaver",
       "target-membership": [
-        "Trinity"
+        "Trinity",
       ],
       "membership-exceptions": [
         {
           "target": "Trinity",
           "exclusions": [
-            "Info.plist"
-          ]
-        }
-      ]
-    },
-    {
+            "Info.plist",
+          ],
+        },
+      ],
+    }, {
       "kind": "folder",
       "path": "Preview",
       "target-membership": [
-        "TrinityPreview"
+        "TrinityPreview",
       ],
       "membership-exceptions": [
         {
           "target": "TrinityPreview",
           "exclusions": [
-            "Info.plist"
-          ]
-        }
-      ]
-    },
-    {
+            "Info.plist",
+          ],
+        },
+      ],
+    }, {
       "kind": "group",
       "name": "Products",
       "children": [
-        {
-          "path": "<PRODUCTS>/Trinity.saver",
-          "id": "A00000000000000000000001",
-          "type": "wrapper.cfbundle",
-          "index": false
-        },
-        {
-          "path": "<PRODUCTS>/TrinityPreview.app",
-          "id": "A00000000000000000000002",
-          "type": "wrapper.application",
-          "index": false
-        }
-      ]
-    }
+        { "path": "<PRODUCTS>/Trinity.saver", "id": "A00000000000000000000001", "type": "wrapper.cfbundle", "index": false },
+        { "path": "<PRODUCTS>/TrinityPreview.app", "id": "A00000000000000000000002", "type": "wrapper.application", "index": false },
+      ],
+    },
   ],
   "targets": [
     {
@@ -81,26 +59,25 @@
       "build-phases": [
         "compile-sources",
         "frameworks",
-        "resources"
+        "resources",
       ],
       "build-settings": {
-        "PRODUCT_NAME": "Trinity",
-        "PRODUCT_BUNDLE_IDENTIFIER": "fr.whine.Trinity",
+        "ENABLE_APP_SANDBOX": "NO",
         "GENERATE_INFOPLIST_FILE": "NO",
         "INFOPLIST_FILE": "ScreenSaver/Info.plist",
-        "ENABLE_APP_SANDBOX": "NO",
+        "INSTALL_PATH": "$(HOME)/Library/Screen Savers",
         "LD_RUNPATH_SEARCH_PATHS": [
           "$(inherited)",
           "@executable_path/../Frameworks",
-          "@loader_path/../Frameworks"
+          "@loader_path/../Frameworks",
         ],
-        "WRAPPER_EXTENSION": "saver",
         "MACH_O_TYPE": "mh_bundle",
-        "INSTALL_PATH": "$(HOME)/Library/Screen Savers",
-        "SKIP_INSTALL": "YES"
-      }
-    },
-    {
+        "PRODUCT_BUNDLE_IDENTIFIER": "fr.whine.Trinity",
+        "PRODUCT_NAME": "Trinity",
+        "SKIP_INSTALL": "YES",
+        "WRAPPER_EXTENSION": "saver",
+      },
+    }, {
       "name": "TrinityPreview",
       "id": "B00000000000000000000002",
       "product": "Products/TrinityPreview.app",
@@ -108,56 +85,86 @@
       "build-phases": [
         "compile-sources",
         "frameworks",
-        "resources"
+        "resources",
       ],
       "build-settings": {
-        "PRODUCT_NAME": "TrinityPreview",
-        "PRODUCT_BUNDLE_IDENTIFIER": "fr.whine.Trinity.Preview",
+        "ENABLE_APP_SANDBOX": "NO",
         "GENERATE_INFOPLIST_FILE": "NO",
         "INFOPLIST_FILE": "Preview/Info.plist",
-        "ENABLE_APP_SANDBOX": "NO",
         "LD_RUNPATH_SEARCH_PATHS": [
           "$(inherited)",
           "@executable_path/../Frameworks",
-          "@loader_path/../Frameworks"
-        ]
-      }
-    }
+          "@loader_path/../Frameworks",
+        ],
+        "PRODUCT_BUNDLE_IDENTIFIER": "fr.whine.Trinity.Preview",
+        "PRODUCT_NAME": "TrinityPreview",
+      },
+    },
   ],
   "build-settings": {
     "ARCHS": "arm64",
-    "SDKROOT": "macosx",
-    "MACOSX_DEPLOYMENT_TARGET": "27.0",
-    "SWIFT_VERSION": "6.0",
-    "SWIFT_STRICT_CONCURRENCY": "complete",
-    "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
     "CLANG_ENABLE_MODULES": "YES",
     "CLANG_ENABLE_OBJC_ARC": "YES",
-    "CODE_SIGN_STYLE": "Manual",
+    "CLANG_WARN_ASSIGN_ENUM": "YES",
+    "CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING": "YES",
+    "CLANG_WARN_BOOL_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_COMMA": "YES_ERROR",
+    "CLANG_WARN_COMPLETION_HANDLER_MISUSE": "YES",
+    "CLANG_WARN_CONSTANT_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_DOCUMENTATION_COMMENTS": "YES",
+    "CLANG_WARN_EMPTY_BODY": "YES",
+    "CLANG_WARN_ENUM_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_FLOAT_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_FRAMEWORK_INCLUDE_PRIVATE_FROM_PUBLIC": "YES",
+    "CLANG_WARN_IMPLICIT_FALLTHROUGH": "YES_ERROR",
+    "CLANG_WARN_IMPLICIT_SIGN_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_INFINITE_RECURSION": "YES",
+    "CLANG_WARN_INT_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_NON_LITERAL_NULL_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER": "YES_ERROR",
+    "CLANG_WARN_SEMICOLON_BEFORE_METHOD_BODY": "YES",
+    "CLANG_WARN_STRICT_PROTOTYPES": "YES",
+    "CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION": "YES_ERROR",
+    "CLANG_WARN_UNREACHABLE_CODE": "YES_AGGRESSIVE",
     "CODE_SIGN_IDENTITY": "-",
-    "DEVELOPMENT_TEAM": "",
-    "MARKETING_VERSION": "1.0",
+    "CODE_SIGN_STYLE": "Manual",
     "CURRENT_PROJECT_VERSION": "2",
-    "SWIFT_OBJC_BRIDGING_HEADER": "Shared/Trinity-Bridging-Header.h",
-    "MTL_HEADER_SEARCH_PATHS": "$(SRCROOT)/Shared",
-    "SWIFT_OPTIMIZATION_LEVEL[config=Debug]": "-Onone",
-    "SWIFT_OPTIMIZATION_LEVEL[config=Release]": "-O",
-    "SWIFT_COMPILATION_MODE[config=Release]": "wholemodule",
-    "SWIFT_ACTIVE_COMPILATION_CONDITIONS[config=Debug]": "DEBUG $(inherited)",
+    "DEBUG_INFORMATION_FORMAT[config=Debug]": "dwarf",
+    "DEBUG_INFORMATION_FORMAT[config=Release]": "dwarf-with-dsym",
+    "DEVELOPMENT_TEAM": "",
+    "GCC_OPTIMIZATION_LEVEL[config=Release]": "s",
+    "GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS": "YES",
+    "GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS": "YES",
+    "GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS": "YES",
+    "GCC_WARN_ABOUT_MISSING_NEWLINE": "YES",
+    "GCC_WARN_ABOUT_MISSING_PROTOTYPES": "YES",
+    "GCC_WARN_ABOUT_RETURN_TYPE": "YES",
+    "GCC_WARN_FOUR_CHARACTER_CONSTANTS": "YES",
+    "GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED": "YES",
+    "GCC_WARN_SHADOW": "YES",
+    "GCC_WARN_SIGN_COMPARE": "YES",
+    "GCC_WARN_UNINITIALIZED_AUTOS": "YES_AGGRESSIVE",
+    "GCC_WARN_UNKNOWN_PRAGMAS": "YES",
+    "GCC_WARN_UNUSED_FUNCTION": "YES",
+    "GCC_WARN_UNUSED_LABEL": "YES",
+    "GCC_WARN_UNUSED_PARAMETER": "YES",
+    "GCC_WARN_UNUSED_VARIABLE": "YES",
+    "MACOSX_DEPLOYMENT_TARGET": "27.0",
+    "MARKETING_VERSION": "1.0",
     "MTL_ENABLE_DEBUG_INFO[config=Debug]": "INCLUDE_SOURCE",
     "MTL_FAST_MATH": "NO",
-    "GCC_OPTIMIZATION_LEVEL[config=Release]": "s",
-    "DEBUG_INFORMATION_FORMAT[config=Debug]": "dwarf",
-    "DEBUG_INFORMATION_FORMAT[config=Release]": "dwarf-with-dsym"
+    "MTL_HEADER_SEARCH_PATHS": "$(SRCROOT)/Shared",
+    "RUN_CLANG_STATIC_ANALYZER": "YES",
+    "SDKROOT": "macosx",
+    "SWIFT_ACTIVE_COMPILATION_CONDITIONS[config=Debug]": "DEBUG $(inherited)",
+    "SWIFT_COMPILATION_MODE[config=Release]": "wholemodule",
+    "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
+    "SWIFT_OBJC_BRIDGING_HEADER": "Shared/Trinity-Bridging-Header.h",
+    "SWIFT_OPTIMIZATION_LEVEL[config=Debug]": "-Onone",
+    "SWIFT_OPTIMIZATION_LEVEL[config=Release]": "-O",
+    "SWIFT_STRICT_CONCURRENCY": "complete",
+    "SWIFT_VERSION": "6.0",
   },
   "last-upgrade": "27.2",
   "last-swift-update": "27.2",
-  "localizations": {
-    "development": "en",
-    "supported": [
-      "Base",
-      "en"
-    ]
-  },
-  "packages": []
 }
