@@ -3,8 +3,10 @@ import AppKit
 @main
 @MainActor
 final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuItemValidation {
-	private var window: NSWindow!
-	private var metalView: TrinityMetalView!
+	/// The single preview window, owned for the app's lifetime; it is not released when closed.
+	private let window: NSWindow
+	/// The window's content view and the renderer under inspection.
+	private let metalView: TrinityMetalView
 	private var options: TrinityOptionsController?
 	private var diagnosticsTimer: Timer?
 	private let diagnosticLabel = NSTextField(labelWithString: "")
@@ -19,21 +21,25 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		withExtendedLifetime(delegate) {}
 	}
 
-	func applicationDidFinishLaunching(_ notification: Notification) {
-		NSWindow.allowsAutomaticWindowTabbing = false
-		buildMenu()
+	override init() {
 		window = NSWindow(
 			contentRect: NSRect(x: 0, y: 0, width: 1100, height: 740),
 			styleMask: [.titled, .closable, .miniaturizable, .resizable],
 			backing: .buffered,
 			defer: false
 		)
+		metalView = TrinityMetalView(frame: NSRect(origin: .zero, size: window.contentLayoutRect.size))
+		super.init()
+	}
+
+	func applicationDidFinishLaunching(_ notification: Notification) {
+		NSWindow.allowsAutomaticWindowTabbing = false
+		buildMenu()
 		window.title = "Trinity Preview"
 		window.minSize = NSSize(width: 420, height: 300)
 		window.collectionBehavior = [.fullScreenPrimary]
 		window.delegate = self
 		window.isReleasedWhenClosed = false
-		metalView = TrinityMetalView(frame: NSRect(origin: .zero, size: window.contentLayoutRect.size))
 		metalView.autoresizingMask = [.width, .height]
 		window.contentView = metalView
 		diagnosticLabel.font = .monospacedSystemFont(ofSize: 12, weight: .medium)
@@ -90,7 +96,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 	@objc private func toggleFullScreen() { window.toggleFullScreen(nil) }
 	func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
 		if menuItem.action == #selector(toggleFullScreen) {
-			menuItem.title = window?.styleMask.contains(.fullScreen) == true ? "Exit Full Screen" : "Enter Full Screen"
+			menuItem.title = window.styleMask.contains(.fullScreen) ? "Exit Full Screen" : "Enter Full Screen"
 		}
 		return true
 	}
@@ -147,7 +153,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 	func applicationWillTerminate(_ notification: Notification) {
-		metalView?.stop()
+		metalView.stop()
 		diagnosticsTimer?.invalidate()
 	}
 }
