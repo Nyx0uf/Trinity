@@ -43,10 +43,21 @@ Both products log to the unified log under the subsystem `fr.whine.Trinity`:
 log stream --level info --predicate 'subsystem == "fr.whine.Trinity"'
 ```
 
-## Install manually
+## Install the screensaver
 
-Double-click the built `Trinity.saver` and follow macOS's installation dialog,
-or copy it into your personal Screen Savers directory:
+Run this command from the repository root.
+
+```sh
+make install
+```
+
+This builds the Release screensaver, installs it in `~/Library/Screen Savers`,
+and removes the temporary build files. Set `SCREENSAVER_INSTALL_DIR` to an
+absolute path to use a different destination.
+
+For a manual installation, double-click the built `Trinity.saver` and follow
+macOS's installation dialog, or copy the bundle into your personal Screen Savers
+directory.
 
 ```sh
 mkdir -p "$HOME/Library/Screen Savers"
