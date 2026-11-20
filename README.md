@@ -33,25 +33,15 @@ xcodebuild -project Trinity.xcodeproj -scheme TrinityPreview \
 open .build/Build/Products/Release/TrinityPreview.app
 ```
 
-In the preview app, use **Trinity Options…** (⌘,) for tuning, **View → Show
-Diagnostics** (⌘D) for requested/measured fps, render size and GPU time, and
+In the preview app, use **Trinity Options…** (⌘,) for tuning and
 **View → Enter Full Screen** (⌃⌘F) to evaluate fullscreen performance.
+The diagnostics overlay appears by default; toggle it with ⌘D.
 To also log diagnostics every second, launch its executable with `--diagnostics`.
 Both products log to the unified log under the subsystem `fr.whine.Trinity`:
 
 ```sh
 log stream --level info --predicate 'subsystem == "fr.whine.Trinity"'
 ```
-
-## Release versions
-
-`Trinity.saver` and `TrinityPreview.app` share one `YEAR.NUMBER_OF_RELEASE`
-version and one build number in the Xcode project. From the repository root,
-run `make bump-version` once before building both products for a new release.
-It uses the local calendar year and advances `2026.1` to `2026.2` within that
-year, or starts at `2027.1` for the first release in 2027. The shared build
-number increases by one with each bump, including across years. Regular builds
-and installs use the recorded version.
 
 ## Install the screensaver
 
@@ -85,44 +75,11 @@ When replacing an installed build, close the preview and System Settings first.
 The system may keep older screensaver bundles loaded until its host restarts;
 log out and back in if it continues displaying an older build.
 
-## Rendering and lifecycle
-
-The two targets compile the same `Shared` sources and resources. A C header
-defines the identical Swift/Metal uniform layout. `TrinityRenderer` owns GPU
-resources; `TrinityMetalView` owns the layer, view-bound display link and sleep
-observers; `TrinityScreenSaverView` adapts the macOS ScreenSaver interface.
-The preview executable loads its own shader library, while the saver explicitly
-loads the library and atlas from its own bundle rather than the host's bundle.
-
-The classic 80×80 simulation grid is cropped along the viewport's shorter axis,
-matching upstream's layout and keeping glyphs square. Density changes its grid
-dimension. Glyph ages advance by elapsed animation seconds calibrated against
-upstream's 60 Hz reference. Fall speed and cycling therefore do not accelerate
-on high-refresh displays. Timing is reset after suspension to avoid catch-up.
-
-Simulation textures remain on the GPU. Intermediate rain/bloom surfaces use
-two-channel 16-bit floating point (trail and cursor brightness); glyph state uses
-32-bit floats. The bloom pyramid has five
-levels with upstream's threshold, blur and combination weights. Its result is
-combined directly in the palette pass to avoid an extra full-resolution surface.
-The atlas is loaded as linear data with the original bottom-left coordinate origin.
-
-The renderer permits at most three frames in flight, skips submissions when busy,
-and reallocates surfaces only when required. A display link weakly references its
-view. Stop, removal from a window, teardown and display sleep invalidate it;
-hidden views submit no GPU work. Standalone app windows also pause when occluded.
-The screensaver host bypasses window occlusion checks because its fullscreen
-`NSServiceViewControllerWindow` reports no `.visible` flag while remotely presented;
-using that flag as a rendering gate caused a black fullscreen saver. The host's `animateOneFrame` timer
-does not drive rendering. Trinity never terminates the host or uses a frontmost-app
-allowlist. Recent macOS hosts have reported lifecycle inconsistencies; installed
-host behavior still needs the acceptance checks below.
-
-Missing Metal or bundled resources leave the screensaver black and produce a log
-message. The preview app also presents the error. Debug builds support Metal
-validation and GPU capture in Xcode.
+Release versioning and renderer details are documented in [Technical notes](TECHNICAL.md).
 
 ## Credits and license
+
+Trinity's code was generated with Claude, a large language model (LLM).
 
 Trinity's original code is released under the [MIT License](LICENSE), the same
 permissive license used by [Rezmason/matrix][upstream]. The Metal renderer
