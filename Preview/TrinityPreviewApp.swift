@@ -39,8 +39,8 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 	/// Creates the window and its Metal view; they are configured and shown at launch.
 	override init() {
 		window = NSWindow(
-			contentRect: NSRect(x: 0, y: 0, width: 1100, height: 740),
-			styleMask: [.titled, .closable, .miniaturizable, .resizable],
+			contentRect: NSRect(x: 0, y: 0, width: 1280, height: 720),
+			styleMask: [.titled, .closable, .resizable],
 			backing: .buffered,
 			defer: false
 		)
@@ -54,7 +54,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		NSWindow.allowsAutomaticWindowTabbing = false
 		buildMenu()
 		window.title = String(localized: .previewWindowTitle)
-		window.minSize = NSSize(width: 420, height: 300)
+		window.minSize = NSSize(width: 1024, height: 576)
 		window.collectionBehavior = [.fullScreenPrimary]
 		window.delegate = self
 		window.isReleasedWhenClosed = false
