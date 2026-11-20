@@ -15,7 +15,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 	private var options: TrinityOptionsController?
 	/// Refreshes the diagnostics overlay once a second until the window closes.
 	private var diagnosticsTimer: Timer?
-	/// Performance overlay in the window's top-left corner; hidden by default.
+	/// Performance overlay in the window's top-left corner; shown at launch.
 	private let diagnosticLabel = NSTextField(labelWithString: "")
 	/// View menu item toggling the overlay; its title reflects the overlay's state.
 	private let diagnosticsItem = NSMenuItem(
@@ -48,8 +48,8 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		super.init()
 	}
 
-	/// Builds the menus, shows the window and starts rendering. `--diagnostics` shows the
-	/// overlay immediately and also logs it every second.
+	/// Builds the menus, shows the window and diagnostics overlay, and starts rendering.
+	/// `--diagnostics` also logs the overlay's statistics every second.
 	func applicationDidFinishLaunching(_ notification: Notification) {
 		NSWindow.allowsAutomaticWindowTabbing = false
 		buildMenu()
@@ -78,7 +78,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		metalView.start()
 		if let message = metalView.failureMessage { showError(message) }
 		diagnosticsTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(refreshDiagnostics), userInfo: nil, repeats: true)
-		if CommandLine.arguments.contains("--diagnostics") { toggleDiagnostics() }
+		toggleDiagnostics()
 	}
 
 	/// Installs the application and View menus. Every item except Quit targets this delegate.
