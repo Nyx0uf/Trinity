@@ -23,6 +23,8 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		action: #selector(TrinityPreviewApp.toggleDiagnostics),
 		keyEquivalent: "d"
 	)
+	/// Top-centered, nonmodal progress and result feedback for screenshot saves.
+	private let screenshotToast = TrinityScreenshotToast()
 	/// Prevents concurrent captures while GPU readback and PNG writing are in progress.
 	private var savingScreenshot = false
 	/// Whether the overlay is shown.
@@ -42,7 +44,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 	override init() {
 		window = NSWindow(
 			contentRect: NSRect(x: 0, y: 0, width: 1280, height: 720),
-			styleMask: [.titled, .closable, .resizable],
+			styleMask: [.titled, .closable, .miniaturizable, .resizable],
 			backing: .buffered,
 			defer: false
 		)
@@ -56,7 +58,8 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		NSWindow.allowsAutomaticWindowTabbing = false
 		buildMenu()
 		window.title = String(localized: .previewWindowTitle)
-		window.minSize = NSSize(width: 1024, height: 576)
+		// Allow half- and quarter-screen tiles on smaller displays.
+		window.minSize = NSSize(width: 320, height: 180)
 		window.collectionBehavior = [.fullScreenPrimary]
 		window.delegate = self
 		window.isReleasedWhenClosed = false
@@ -73,6 +76,12 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 			diagnosticLabel.leadingAnchor.constraint(equalTo: metalView.leadingAnchor, constant: 16),
 			diagnosticLabel.topAnchor.constraint(equalTo: metalView.topAnchor, constant: 16)
 		])
+		metalView.addSubview(screenshotToast)
+		NSLayoutConstraint.activate([
+			screenshotToast.centerXAnchor.constraint(equalTo: metalView.centerXAnchor),
+			screenshotToast.topAnchor.constraint(equalTo: metalView.topAnchor, constant: 16),
+			screenshotToast.widthAnchor.constraint(lessThanOrEqualTo: metalView.widthAnchor, constant: -32)
+		])
 		metalView.onError = { [weak self] message in self?.showError(message) }
 		window.center()
 		window.makeKeyAndOrderFront(nil)
@@ -83,7 +92,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		toggleDiagnostics()
 	}
 
-	/// Installs the application, File and View menus. Every item except Quit targets this delegate.
+	/// Installs app commands and registers the Window menu so AppKit supplies native tiling actions.
 	private func buildMenu() {
 		let main = NSMenu()
 		let appItem = NSMenuItem()
@@ -109,7 +118,16 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		fullscreen.keyEquivalentModifierMask = [.command, .control]
 		viewItem.submenu = view
 		main.addItem(viewItem)
+		let windowTitle = String(localized: .menuWindow)
+		let windowItem = NSMenuItem(title: windowTitle, action: nil, keyEquivalent: "")
+		let windowMenu = NSMenu(title: windowTitle)
+		windowMenu.addItem(withTitle: String(localized: .menuMinimize), action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
+		windowMenu.addItem(withTitle: String(localized: .menuZoom), action: #selector(NSWindow.performZoom(_:)), keyEquivalent: "")
+		windowItem.submenu = windowMenu
+		main.addItem(windowItem)
 		NSApplication.shared.mainMenu = main
+		// Keep native window commands in the responder chain; AppKit adds Move & Resize shortcuts.
+		NSApplication.shared.windowsMenu = windowMenu
 		for menu in [app, file, view] { for item in menu.items where item.action != #selector(NSApplication.terminate(_:)) { item.target = self } }
 	}
 
@@ -142,6 +160,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		guard !savingScreenshot, let renderer = metalView.renderer else { return }
 
 		savingScreenshot = true
+		screenshotToast.show(String(localized: .screenshotSaving))
 		// AppKit actions are synchronous; this task owns the asynchronous capture and file write.
 		Task {
 			defer { savingScreenshot = false }
@@ -151,11 +170,9 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 				let url = desktop.appending(path: "Trinity-\(timestamp)-\(UUID().uuidString).png")
 				let screenshot = try await renderer.screenshot()
 				try await screenshot.savePNG(to: url)
+				screenshotToast.show(String(localized: .screenshotSavedToDesktop), dismissAfter: 4)
 			} catch {
-				let alert = NSAlert()
-				alert.messageText = String(localized: .screenshotFailedTitle)
-				alert.informativeText = error.localizedDescription
-				await alert.beginSheetModal(for: window)
+				screenshotToast.show(String(localized: .screenshotSaveError(error.localizedDescription)), isError: true, dismissAfter: 10)
 			}
 		}
 	}
@@ -215,6 +232,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 
 	/// Stops rendering and the diagnostics timer when the window closes.
 	func windowWillClose(_ notification: Notification) {
+		screenshotToast.dismiss()
 		metalView.stop()
 		diagnosticsTimer?.invalidate()
 	}
@@ -224,6 +242,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 
 	/// Stops rendering and the diagnostics timer before quitting.
 	func applicationWillTerminate(_ notification: Notification) {
+		screenshotToast.dismiss()
 		metalView.stop()
 		diagnosticsTimer?.invalidate()
 	}

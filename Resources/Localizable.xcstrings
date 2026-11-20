@@ -265,6 +265,18 @@
         }
       }
     },
+    "menuMinimize" : {
+      "comment" : "Window menu item that minimizes the key window.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minimize"
+          }
+        }
+      }
+    },
     "menuOptions" : {
       "comment" : "Application menu item that opens the options sheet.",
       "extractionState" : "manual",
@@ -321,6 +333,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "View"
+          }
+        }
+      }
+    },
+    "menuWindow" : {
+      "comment" : "Title of the native preview app Window menu, registered with AppKit for tiling commands.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window"
+          }
+        }
+      }
+    },
+    "menuZoom" : {
+      "comment" : "Window menu item that toggles the key window between its standard and user sizes.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoom"
           }
         }
       }
@@ -565,14 +601,38 @@
         }
       }
     },
-    "screenshotFailedTitle" : {
-      "comment" : "Title of the alert shown when screenshot capture or saving fails.",
+    "screenshotSaveError" : {
+      "comment" : "Screenshot failure toast. %@ is the localized capture or file-writing error description.",
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trinity could not save the screenshot"
+            "value" : "Error: %@"
+          }
+        }
+      }
+    },
+    "screenshotSavedToDesktop" : {
+      "comment" : "Toast confirming that the screenshot PNG was saved on the Desktop.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved to Desktop"
+          }
+        }
+      }
+    },
+    "screenshotSaving" : {
+      "comment" : "Toast shown while GPU capture and PNG saving are in progress.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving screenshot…"
           }
         }
       }
