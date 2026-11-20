@@ -122,38 +122,6 @@ Missing Metal or bundled resources leave the screensaver black and produce a log
 message. The preview app also presents the error. Debug builds support Metal
 validation and GPU capture in Xcode.
 
-## Verification
-
-Verified on macOS 27.2.1, Xcode 27.2, Apple M4, one 3840×2160 60 Hz display:
-
-- Both schemes build in Debug and Release; the saver is an arm64 Mach-O bundle.
-- Ad-hoc signatures, principal class, deployment target and bundled library/atlas
-  are verified.
-- Classic appearance compared visually with the upstream WebGL demo: glyph
-  orientation, proportions, rain, highlights, palette and bloom.
-- Preview measured 60 fps in Match Display and 60 fps modes, and 30 fps in
-  30 fps mode. At native 4K fullscreen, sampled Debug GPU durations were about
-  3–7 ms with no skipped submissions during the observed interval.
-- Fullscreen macOS screensaver host diagnosed and fixed: the remote host reports
-  an occlusion state of 8192 (without `.visible`). Removing that rendering gate
-  specifically for screensaver views restored 60 fps at 3840×2160, confirmed from
-  120 submitted frames and GPU timestamps in a temporary diagnostic build.
-- Live hue changes, Cancel, Apply, Restore Defaults, persisted settings and
-  repeated Options opening checked interactively; fullscreen transitions checked.
-
-Still requiring hardware/installed-host acceptance: 120 Hz and higher displays,
-physical Retina scaling, display migration, multiple displays, actual display
-sleep/wake, repeated fullscreen screensaver dismissal and long-running legacy-host
-instance cleanup. The System Settings thumbnail and actual fullscreen host both
-load Trinity. The fullscreen host was instrumented during the black-screen fix;
-that temporary instrumentation is absent from the delivered builds.
-
-After manual installation, run the saver and dismiss it several times, checking
-that dismissed instances stop submitting GPU work in Instruments. Exercise
-System Settings previews and repeated Options opening, sleep/wake, mixed-refresh
-displays and portrait windows. Compare motion speed between 30, 60 and Match
-Display policies. Do not infer installed-host lifecycle correctness from the app.
-
 ## Credits and license
 
 Trinity's original code is released under the [MIT License](LICENSE), the same
