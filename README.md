@@ -43,6 +43,16 @@ Both products log to the unified log under the subsystem `fr.whine.Trinity`:
 log stream --level info --predicate 'subsystem == "fr.whine.Trinity"'
 ```
 
+## Release versions
+
+`Trinity.saver` and `TrinityPreview.app` share one `YEAR.NUMBER_OF_RELEASE`
+version and one build number in the Xcode project. From the repository root,
+run `make bump-version` once before building both products for a new release.
+It uses the local calendar year and advances `2026.1` to `2026.2` within that
+year, or starts at `2027.1` for the first release in 2027. The shared build
+number increases by one with each bump, including across years. Regular builds
+and installs use the recorded version.
+
 ## Install the screensaver
 
 Run this command from the repository root.

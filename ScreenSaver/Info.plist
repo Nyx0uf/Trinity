@@ -27,6 +27,6 @@
 	<key>NSPrincipalClass</key>
 	<string>TrinityScreenSaverView</string>
 	<key>ScreenSaverVersion</key>
-	<string>1.0</string>
+	<string>$(MARKETING_VERSION)</string>
 </dict>
 </plist>
