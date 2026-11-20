@@ -10,11 +10,11 @@ Make architectural decisions with a strong understanding of macOS application an
 
 ## 1. Core Requirements
 
-- Target **macOS 27.0 or later**, matching Esper and Kiroshi.
+- Target **macOS 26.0 or later**.
 - Support **Apple Silicon (`arm64`) exclusively**. Do not introduce Intel (`x86_64`) compatibility code or architecture-specific validation.
 - Use **Swift 6.4 or later**, in Swift 6 language mode.
 - Assume **strict Swift concurrency checking**.
-- Verify API availability against the macOS 27.0 SDK and the project's deployment target.
+- Verify API availability against the project's macOS 26.0 deployment target using the configured SDK.
 - Prefer native Apple frameworks and APIs.
 - **Do not introduce third-party dependencies without asking first.**
 - **Do not introduce testing frameworks or test infrastructure without explicit permission.**

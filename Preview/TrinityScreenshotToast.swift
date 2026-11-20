@@ -15,7 +15,6 @@ final class TrinityScreenshotToast: NSGlassEffectView {
 		translatesAutoresizingMaskIntoConstraints = false
 		style = .regular
 		cornerRadius = 16
-		effectIsInteractive = false
 		isHidden = true
 
 		let content = NSView()

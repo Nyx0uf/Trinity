@@ -1,6 +1,6 @@
 # Trinity
 
-A native Metal screensaver for **macOS 27.0 or later, Apple Silicon**. A fresh
+A native Metal screensaver for **macOS 26.0 or later, Apple Silicon**. A fresh
 translation of [Rezmason/matrix](https://github.com/Rezmason/matrix)'s classic
 2D effect, with stationary MSDF glyphs, falling illumination, bright cursors,
 five-level bloom, palette mapping, and dither.
