@@ -146,17 +146,21 @@ Display policies. Do not infer installed-host lifecycle correctness from the app
 
 ## Credits and license
 
-The original effect, classic glyph atlas, equations and visual defaults are by
-Rezmason, © 2018, MIT licensed. Source revision:
-`5ba90490453ceceb6812d6b1bc658a99a92411d0`.
+Trinity's original code is released under the [MIT License](LICENSE), the same
+permissive license used by [Rezmason/matrix][upstream]. The Metal renderer
+translates the classic effect from revision `5ba90490453ceceb6812d6b1bc658a99a92411d0`,
+including `js/config.js`, `js/regl/rainPass.js`, `js/regl/palettePass.js`,
+`js/regl/bloomPass.js` and the relevant `shaders/glsl` sources. The port preserves
+the [upstream MIT notice](Resources/Rezmason-LICENSE.txt).
 
-The Metal shaders were translated directly from that revision's `js/config.js`,
-`js/regl/rainPass.js`, `js/regl/palettePass.js`, `js/regl/bloomPass.js` and relevant
-`shaders/glsl` sources. The bundled atlas is `assets/matrixcode_msdf.png`.
-See `Resources/Rezmason-LICENSE.txt`, also included in both built products.
-Trinity's additions are MIT licensed; see `LICENSE`.
+Trinity bundles the upstream `assets/matrixcode_msdf.png` unchanged. Rezmason
+traces its classic glyph artwork to an official Matrix product's promotional
+site. Permission from the original artwork's rights holders has not been
+verified. See the [bundled third-party notice](Resources/Third-Party-Notices.txt)
+and [upstream provenance][glyph-provenance].
 
-[cuberact/matrix-digital-rain](https://github.com/cuberact/matrix-digital-rain)
-was inspected as a reference for the user's comparison. Trinity does not use its
-Swift or Metal implementation. Trinity is the app name; upstream's separate
-“Trinity” visual preset is not part of this classic-only port.
+`Trinity.saver` and `TrinityPreview.app` both include the Trinity MIT license,
+the upstream MIT notice and the third-party notice.
+
+[upstream]: https://github.com/Rezmason/matrix/tree/5ba90490453ceceb6812d6b1bc658a99a92411d0
+[glyph-provenance]: https://github.com/Rezmason/matrix/blob/5ba90490453ceceb6812d6b1bc658a99a92411d0/README.md#goals

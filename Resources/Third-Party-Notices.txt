@@ -1,0 +1,12 @@
+Rezmason/matrix
+https://github.com/Rezmason/matrix/tree/5ba90490453ceceb6812d6b1bc658a99a92411d0
+
+Trinity's Metal renderer translates the upstream classic effect. The upstream
+MIT license and copyright notice are included in Rezmason-LICENSE.txt.
+
+Trinity bundles an unchanged copy of assets/matrixcode_msdf.png from the same
+revision. Rezmason traces the classic glyph artwork to vector graphics from an
+official Matrix product's promotional site. Permission from the original
+artwork's rights holders has not been verified.
+
+https://github.com/Rezmason/matrix/blob/5ba90490453ceceb6812d6b1bc658a99a92411d0/README.md#goals
