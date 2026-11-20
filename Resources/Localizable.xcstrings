@@ -97,6 +97,42 @@
         }
       }
     },
+    "errorScreenshotCapture" : {
+      "comment" : "Screenshot error when GPU readback resources cannot be created.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metal could not capture the digital rain. Try again."
+          }
+        }
+      }
+    },
+    "errorScreenshotEncoding" : {
+      "comment" : "Screenshot error when image construction or PNG encoding fails.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The captured frame could not be encoded as a PNG."
+          }
+        }
+      }
+    },
+    "errorScreenshotUnavailable" : {
+      "comment" : "Screenshot error when no rendered frame is available.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The preview has not rendered a frame yet. Try again in a moment."
+          }
+        }
+      }
+    },
     "errorShaderLibraryIncomplete" : {
       "comment" : "Rendering error: required shader functions are missing.",
       "extractionState" : "manual",
@@ -205,6 +241,18 @@
         }
       }
     },
+    "menuFile" : {
+      "comment" : "Title of the preview app File menu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File"
+          }
+        }
+      }
+    },
     "menuHideDiagnostics" : {
       "comment" : "View menu item that hides the performance overlay.",
       "extractionState" : "manual",
@@ -237,6 +285,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quit Trinity Preview"
+          }
+        }
+      }
+    },
+    "menuSaveScreenshot" : {
+      "comment" : "File menu command that saves the digital rain to the Desktop as a PNG.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save Screenshot"
           }
         }
       }
@@ -501,6 +561,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trinity could not start rendering"
+          }
+        }
+      }
+    },
+    "screenshotFailedTitle" : {
+      "comment" : "Title of the alert shown when screenshot capture or saving fails.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinity could not save the screenshot"
           }
         }
       }

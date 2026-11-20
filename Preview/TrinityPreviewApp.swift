@@ -23,6 +23,8 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		action: #selector(TrinityPreviewApp.toggleDiagnostics),
 		keyEquivalent: "d"
 	)
+	/// Prevents concurrent captures while GPU readback and PNG writing are in progress.
+	private var savingScreenshot = false
 	/// Whether the overlay is shown.
 	private var diagnosticsVisible = false
 
@@ -81,7 +83,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		toggleDiagnostics()
 	}
 
-	/// Installs the application and View menus. Every item except Quit targets this delegate.
+	/// Installs the application, File and View menus. Every item except Quit targets this delegate.
 	private func buildMenu() {
 		let main = NSMenu()
 		let appItem = NSMenuItem()
@@ -93,6 +95,12 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		app.addItem(withTitle: String(localized: .menuQuit), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
 		appItem.submenu = app
 		main.addItem(appItem)
+		let fileTitle = String(localized: .menuFile)
+		let fileItem = NSMenuItem(title: fileTitle, action: nil, keyEquivalent: "")
+		let file = NSMenu(title: fileTitle)
+		file.addItem(withTitle: String(localized: .menuSaveScreenshot), action: #selector(saveScreenshot), keyEquivalent: "s")
+		fileItem.submenu = file
+		main.addItem(fileItem)
 		let viewTitle = String(localized: .menuView)
 		let viewItem = NSMenuItem(title: viewTitle, action: nil, keyEquivalent: "")
 		let view = NSMenu(title: viewTitle)
@@ -102,7 +110,7 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 		viewItem.submenu = view
 		main.addItem(viewItem)
 		NSApplication.shared.mainMenu = main
-		for menu in [app, view] { for item in menu.items where item.action != #selector(NSApplication.terminate(_:)) { item.target = self } }
+		for menu in [app, file, view] { for item in menu.items where item.action != #selector(NSApplication.terminate(_:)) { item.target = self } }
 	}
 
 	/// Shows the standard About panel. AppKit reads the version and build from the bundle's
@@ -118,12 +126,38 @@ final class TrinityPreviewApp: NSObject, NSApplicationDelegate, NSWindowDelegate
 	/// Enters or exits full screen.
 	@objc private func toggleFullScreen() { window.toggleFullScreen(nil) }
 
-	/// Keeps the full-screen item's title in step with the window's state; every item stays enabled.
+	/// Keeps the full-screen item's title in step with the window's state and disables unavailable captures.
 	func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
 		if menuItem.action == #selector(toggleFullScreen) {
 			menuItem.title = String(localized: window.styleMask.contains(.fullScreen) ? .menuExitFullScreen : .menuEnterFullScreen)
 		}
+		if menuItem.action == #selector(saveScreenshot) {
+			return !savingScreenshot && metalView.renderer != nil && metalView.failureMessage == nil && window.attachedSheet == nil
+		}
 		return true
+	}
+
+	/// Saves only the digital rain to a uniquely named Desktop PNG; reports capture or write failures.
+	@objc private func saveScreenshot() {
+		guard !savingScreenshot, let renderer = metalView.renderer else { return }
+
+		savingScreenshot = true
+		// AppKit actions are synchronous; this task owns the asynchronous capture and file write.
+		Task {
+			defer { savingScreenshot = false }
+			do {
+				let desktop = try FileManager.default.url(for: .desktopDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+				let timestamp = Date.now.formatted(.iso8601.year().month().day().dateSeparator(.dash).time(includingFractionalSeconds: true).timeSeparator(.omitted)).replacing(":", with: "-")
+				let url = desktop.appending(path: "Trinity-\(timestamp)-\(UUID().uuidString).png")
+				let screenshot = try await renderer.screenshot()
+				try await screenshot.savePNG(to: url)
+			} catch {
+				let alert = NSAlert()
+				alert.messageText = String(localized: .screenshotFailedTitle)
+				alert.informativeText = error.localizedDescription
+				await alert.beginSheetModal(for: window)
+			}
+		}
 	}
 
 	/// Opens the options sheet on the current configuration. Apply saves the result and applies it here.

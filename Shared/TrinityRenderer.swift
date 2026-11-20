@@ -91,6 +91,11 @@ final class TrinityRenderer {
 	/// so completing a frame needs no main-actor hop.
 	private let gpuMilliseconds = GPUTime()
 
+	/// Uniforms of the last submitted frame; nil until there is an image to capture.
+	private var screenshotUniforms: TrinityUniforms?
+	/// Backing-pixel dimensions of the last submitted drawable.
+	private var screenshotSize = SIMD2<Int>(0, 0)
+
 	/// Frame statistics for the preview app's diagnostics overlay.
 	var diagnostics: Diagnostics {
 		var value = counters
@@ -394,6 +399,8 @@ final class TrinityRenderer {
 			}
 		}
 		command.commit()
+		screenshotUniforms = uniforms
+		screenshotSize = SIMD2(drawable.texture.width, drawable.texture.height)
 		committed = true
 		stateIndex = nextIndex
 		firstFrame = false
@@ -406,6 +413,62 @@ final class TrinityRenderer {
 			measurementStart = timestamp
 			measurementFrames = 1
 		} else if measurementStart == nil { measurementStart = timestamp }
+	}
+
+	/// Captures the most recently submitted rain frame at the drawable's backing resolution.
+	/// Reuses the composite pass without advancing the simulation or capturing AppKit overlays.
+	func screenshot() async throws -> TrinityScreenshot {
+		guard var uniforms = screenshotUniforms, let primary, let palette,
+		      let command = queue.makeCommandBuffer() else {
+			throw Failure(.errorScreenshotUnavailable)
+		}
+
+		let width = screenshotSize.x
+		let height = screenshotSize.y
+		let destination = try texture(width, height, format: .bgra8Unorm, usage: .renderTarget)
+		let bytesPerRow = (width * 4 + 255) / 256 * 256
+		guard let buffer = device.makeBuffer(length: bytesPerRow * height, options: .storageModeShared) else {
+			throw Failure(.errorScreenshotCapture)
+		}
+
+		try pass(command, pipeline: compositePipeline, destination: destination, sources: [primary] + bloom + [palette], uniforms: &uniforms)
+		guard let blit = command.makeBlitCommandEncoder() else { throw Failure(.errorScreenshotCapture) }
+
+		blit.copy(
+			from: destination,
+			sourceSlice: 0,
+			sourceLevel: 0,
+			sourceOrigin: MTLOrigin(x: 0, y: 0, z: 0),
+			sourceSize: MTLSize(width: width, height: height, depth: 1),
+			to: buffer,
+			destinationOffset: 0,
+			destinationBytesPerRow: bytesPerRow,
+			destinationBytesPerImage: bytesPerRow * height
+		)
+		blit.endEncoding()
+		let readback = ScreenshotReadback(buffer: buffer)
+		return try await withCheckedThrowingContinuation { continuation in
+			command.addCompletedHandler { completed in
+				if let error = completed.error {
+					continuation.resume(throwing: error)
+				} else {
+					let pixels = readback.pixels(count: bytesPerRow * height)
+					continuation.resume(returning: TrinityScreenshot(pixels: pixels, width: width, height: height, bytesPerRow: bytesPerRow))
+				}
+			}
+			command.commit()
+		}
+	}
+
+	/// Transfers a Metal buffer to its completion handler, which alone reads the completed pixels.
+	/// Metal's buffer protocol is not Sendable. This wrapper is safe because the command owns the
+	/// only GPU write, and the CPU reads only after that command's completion fence has fired.
+	nonisolated private struct ScreenshotReadback: @unchecked Sendable {
+		/// Retains the readback allocation until the completion handler copies it.
+		let buffer: MTLBuffer
+
+		/// Copies completed bytes into immutable, Sendable storage; never called before GPU completion.
+		func pixels(count: Int) -> Data { Data(bytes: buffer.contents(), count: count) }
 	}
 
 	/// Lock-protected GPU duration shared between the renderer and Metal's completion handlers.

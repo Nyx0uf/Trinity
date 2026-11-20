@@ -37,6 +37,8 @@ open .build/Build/Products/Release/TrinityPreview.app
 
 In the preview app, use **Trinity Options…** (⌘,) for tuning and
 **View → Enter Full Screen** (⌃⌘F) to evaluate fullscreen performance.
+Use **File → Save Screenshot** (⌘S) to save the digital rain as a PNG on the Desktop,
+without window chrome or the diagnostics overlay, at the window’s backing-pixel resolution.
 The diagnostics overlay appears by default; toggle it with ⌘D.
 To also log diagnostics every second, launch its executable with `--diagnostics`.
 Both products log to the unified log under the subsystem `fr.whine.Trinity`:
