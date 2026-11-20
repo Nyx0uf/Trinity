@@ -5,6 +5,8 @@ translation of [Rezmason/matrix](https://github.com/Rezmason/matrix)'s classic
 2D effect, with stationary MSDF glyphs, falling illumination, bright cursors,
 five-level bloom, palette mapping, and dither.
 
+![Trinity screensaver](docs/images/trinity.png)
+
 Trinity renders at native pixel resolution by default and requests each display's
 maximum refresh rate. There is no fixed 60 fps ceiling in Match Display mode.
 The system and GPU ultimately determine the delivered presentation rate.
